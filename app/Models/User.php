@@ -53,7 +53,10 @@ class User extends Authenticatable implements MustVerifyEmail
             $this->roles()->detach($role->id);
         }
     }
-
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id');
+    }
 
 
     /**

@@ -50,6 +50,7 @@ class LoginController extends Controller
             return response()->json([
                 'id' => $user->id,
                 'name' => $user->name,
+                'role' => $user->roles->first()->name,
                 'verified' => $user->email_verified_at ? true : false,
             ], 200);
         } else {
@@ -63,10 +64,10 @@ class LoginController extends Controller
             $user = Auth::user();
             if ($user->token()) {
                 $user->token()->revoke();
-                return $this->sendResponse([], 'User logged out successfully.');
+                return response()->json([], 200);
             }
-            return $this->sendResponse([], 'User does not have a token.');
+            return response()->json([], 200);
         }
-        return $this->sendResponse([], 'User is not authenticated.');
+        return response()->json([], 200);
     }
 }
