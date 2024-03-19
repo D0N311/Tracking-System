@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ActivateAdminRequest extends FormRequest
+class SearchRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,7 @@ class ActivateAdminRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'admin' => 'required',
-            'role' => 'required|exists:role_db,name',
+            'search' => 'required|string',
         ];
     }
 }

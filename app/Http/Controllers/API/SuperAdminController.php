@@ -36,7 +36,7 @@ class SuperAdminController extends Controller
     {
         $companies = DB::table('company_db')
             ->leftJoin('users as admin', 'company_db.admin_id', '=', 'admin.id')
-            ->select('company_db.id', 'company_db.company_name', 'admin.name as admin_name', 'company_db.location', 'company_db.created_at')
+            ->select('company_db.id', 'company_db.company_name', 'admin.name as admin_name', 'company_db.location', 'company_db.description', 'company_db.created_at')
             ->selectSub(function ($query) {
                 $query->from('users')
                     ->join('user_has_role', 'users.id', '=', 'user_has_role.user_id')
@@ -54,14 +54,25 @@ class SuperAdminController extends Controller
     {
         $input = $request->all();
         DB::beginTransaction();
+
         try {
-            $admin = User::find($input['admin_id']);
+            // Find the user by ID or email
+            $admin = User::where('id', $input['admin'])
+                ->orWhere('email', $input['admin'])
+                ->first();
+
+            if (!$admin) {
+                return response()->json(['success' => false, 'message' => 'Admin not found'], 404);
+            }
+
             if ($admin->activated_at) {
                 return response()->json(['success' => false, 'message' => 'Admin is already activated'], 400);
             }
+
             $admin->activated_at = now();
             $admin->save();
-            $role = Role::where('name', $input['role'])->first();
+
+            $role = Role::where('name', 'Admin')->first();
 
             if ($role) {
                 $admin->roles()->attach($role->id);
@@ -75,6 +86,7 @@ class SuperAdminController extends Controller
         }
     }
 
+
     public function deactivateAdmin(DeactivateAdminRequest $request)
     {
         $input = $request->all();
@@ -82,8 +94,17 @@ class SuperAdminController extends Controller
 
         try {
             $admin = User::find($input['admin_id']);
+            $company = Company::where('admin_id', $input['admin_id'])->first();
+
+            if ($company) {
+                $company->admin_id = null;
+                $company->save();
+            }
+
             $admin->activated_at = null;
+            $admin->company_id = null;
             $admin->save();
+
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Admin deactivated successfully', 'data' => $admin], 200);
         } catch (\Exception $e) {
@@ -114,13 +135,16 @@ class SuperAdminController extends Controller
 
     public function adminIndex()
     {
-        $usersWithoutCompany = User::whereNull('company_id')
-            ->whereHas('roles', function ($query) {
-                $query->whereIn('name', ['Admin', 'User']);
-            })
-            ->get(['name', 'email', 'activated_at']);
+        $admins = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Admin');
+        })
+            ->with(['company' => function ($query) {
+                $query->select('id', 'company_name');
+            }])
+            ->orderBy('id', 'desc')
+            ->paginate(10, ['id', 'name', 'email', 'activated_at', 'company_id']);
 
-        return response()->json(['success' => true, 'message' => 'Admins and users without company retrieved successfully', 'data' => $usersWithoutCompany], 200);
+        return response()->json(['success' => true, 'message' => 'All admins retrieved successfully', 'data' => $admins], 200);
     }
 
     public function setAdmin(SetAdminRequest $request)
@@ -129,6 +153,10 @@ class SuperAdminController extends Controller
         $user = User::find($input['admin_id']);
         $company = Company::find($input['company_id']);
         DB::beginTransaction();
+
+        if (!$user->roles()->where('name', 'Admin')->exists()) {
+            return response()->json(['success' => false, 'message' => 'User is not an admin'], 400);
+        }
 
         if ($user->company_id) {
             return response()->json(['success' => false, 'message' => 'Admin already belongs to a company'], 400);

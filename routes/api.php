@@ -10,11 +10,12 @@ use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\RoleHasPermissionController;
 use App\Http\Controllers\API\UserHasRoleController;
+use App\Http\Controllers\VerifyEmailController;
 use App\Models\Role;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use PharIo\Manifest\Email;
 
 /*
 |--------------------------------------------------------------------------
@@ -119,4 +120,5 @@ Route::middleware('auth:api', 'verified')->group(function () {
     Route::resource('products', ProductController::class);
     Route::post('logout', [LoginController::class, 'logout']);
     Route::get('checkUser', [LoginController::class, 'checkUser']);
+    Route::get('searchInput', [VerifyEmailController::class, 'searchInput']);
 });
