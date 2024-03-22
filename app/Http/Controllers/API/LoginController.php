@@ -52,6 +52,7 @@ class LoginController extends Controller
                 'name' => $user->name,
                 'role' => $user->roles->first()->name,
                 'verified' => $user->email_verified_at ? true : false,
+                'company_id' => $user->company_id,
             ], 200);
         } else {
             return response()->json(['error' => 'Unauthenticated'], 401);

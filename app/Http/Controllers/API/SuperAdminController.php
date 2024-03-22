@@ -178,4 +178,21 @@ class SuperAdminController extends Controller
             return response()->json(['success' => false, 'message' => 'Database Error', 'data' => $e->getMessage()], 500);
         }
     }
+
+    public function noRoleIndex()
+    {
+        $users = User::whereDoesntHave('roles')
+            ->orderBy('id', 'desc')
+            ->paginate(10, ['id', 'name', 'email', 'activated_at', 'company_id']);
+
+        $noRoleCount = User::whereDoesntHave('roles')->count();
+
+        return response()->json([
+            'success' => true,
+            'count' => $noRoleCount,
+            'message' => 'Users with no role retrieved successfully',
+            'data' => $users,
+
+        ], 200);
+    }
 }
