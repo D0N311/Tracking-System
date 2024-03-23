@@ -150,12 +150,12 @@ class SuperAdminController extends Controller
     public function setAdmin(SetAdminRequest $request)
     {
         $input = $request->all();
-        $user = User::find($input['admin_id']);
+        $user = User::where('email', $input['email'])->first();
         $company = Company::find($input['company_id']);
         DB::beginTransaction();
 
-        if (!$user->roles()->where('name', 'Admin')->exists()) {
-            return response()->json(['success' => false, 'message' => 'User is not an admin'], 400);
+        if (!$user || !$user->roles()->where('name', 'Admin')->exists()) {
+            return response()->json(['success' => false, 'message' => 'User is not an admin or does not exist'], 400);
         }
 
         if ($user->company_id) {

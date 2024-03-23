@@ -22,7 +22,7 @@ class SetAdminRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'admin_id' => 'required|exists:users,id',
+            'email' => 'required|exists:users,email',
             'company_id' => 'required|exists:company_db,id',
         ];
     }
