@@ -155,6 +155,9 @@ return [
     |
     */
 
+    'uploadcare_public' => env('UPLOADCARE_PUBLIC_KEY','ab9343d09f0d7ec2ab39'),
+    'uploadcare_secret' => env('UPLOADCARE_SECRET_KEY','aa478b6c6019fc1051a4'),
+
     'providers' => ServiceProvider::defaultProviders()->merge([
         /*
          * Package Service Providers...

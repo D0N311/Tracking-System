@@ -11,6 +11,7 @@ use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\RoleHasPermissionController;
 use App\Http\Controllers\API\UserHasRoleController;
 use App\Http\Controllers\VerifyEmailController;
+use App\Models\Items;
 use App\Models\Role;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Request;
@@ -92,4 +93,5 @@ Route::middleware('auth:api', 'verified')->group(function () {
     Route::get('checkUser', [LoginController::class, 'checkUser']);
     Route::get('searchInput', [VerifyEmailController::class, 'searchInput']);
     Route::get('noRoleIndex', [SuperAdminController::class, 'noRoleIndex']);
+    Route::post('storeItem', [ItemsController::class, 'store']);
 });
