@@ -24,10 +24,11 @@ class ItemsRequest extends FormRequest
         return [
             'item_name' => 'required',
             'item_type' => 'required',
-            'stocks' => 'required',
+            'stocks' => 'required|num',
             'model_number' => 'required',
             'image_link' => 'required',
-            'under_company_id' => 'required',
+            'under_company_name' => 'required|exists:company_db,name',
+            'owner_email' => 'required|exists:users,email',
         ];
     }
 }

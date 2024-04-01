@@ -12,45 +12,8 @@ use App\Models\User;
 
 class ItemsController extends Controller
 {
-    // public function addItems(ItemsRequest $request)
-    // {
-    //     $user = User::where('email', $request->email)->first();
-    //     // Check if the user has a role of 'user'
-    //     if (!$user->hasRole('user')) {
-    //         return response()->json(['message' => 'Only users can add items'], 403);
-    //     }
-    //     $validator = Validator::make($request->all(), []);
-    //     if ($validator->fails()) {
-    //         return response()->json(['message' => $validator->errors()], 400);
-    //     }
-    //     DB::beginTransaction();
-    //     try {
-    //         $item = new Items();
-    //         $item->item_name = $request->input('item_name');
-    //         $item->item_type = $request->input('item_type');
-    //         $item->stocks = $request->input('stocks');
-    //         $item->model_number = $request->input('model_number');
-    //         $item->image_link = $request->input('image_link');
-    //         $item->under_company_id = $request->input('under_company_id');
-    //         $item->save();
-
-    //         DB::commit();
-
-    //         return response()->json(['message' => 'Item added successfully'], 200);
-    //     } catch (\Exception $e) {
-    //         DB::rollback();
-    //         return response()->json(['message' => 'Failed to add item'], 500);
-    //     }
-    // }
     public function addItems(ItemsRequest $request)
     {
-        // $user = User::where('email', $request->email)->first();
-
-        // // Check if the user has a role of 'user'
-        // if (!$user->hasRole('user')) {
-        //     return response()->json(['message' => 'Only users can add items'], 403);
-        // }
-
         DB::beginTransaction();
         try {
             $item = Items::create($request->validated());
