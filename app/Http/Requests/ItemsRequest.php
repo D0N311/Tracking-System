@@ -27,7 +27,7 @@ class ItemsRequest extends FormRequest
             'stocks' => 'required',
             'model_number' => 'required',
             'image' => 'required',
-            'under_company' => 'nullable|exists:company_db,id',
+            'under_company' => 'required|exists:company_db,id',
             'owned_by' => 'nullable|email|exists:users,email',
         ];
     }

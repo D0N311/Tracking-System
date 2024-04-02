@@ -94,4 +94,6 @@ Route::middleware('auth:api', 'verified')->group(function () {
     Route::get('searchInput', [VerifyEmailController::class, 'searchInput']);
     Route::get('noRoleIndex', [SuperAdminController::class, 'noRoleIndex']);
     Route::post('storeItem', [ItemsController::class, 'store']);
+    Route::get('companyItems', [ItemsController::class, 'companyItems']);
+    Route::get('userItems', [ItemsController::class, 'userItems']);
 });

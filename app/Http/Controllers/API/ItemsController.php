@@ -20,6 +20,7 @@ class ItemsController extends Controller
         $configuration = \Uploadcare\Configuration::create(config('app.uploadcare_public'), config('app.uploadcare_secret'));
         $uploader = (new \Uploadcare\Api($configuration))->uploader();
         $user = User::where('email', $request->owned_by)->first();
+        $
 
         $image = empty($request->image) ? '' : $uploader->fromPath($request->image, 'image/jpeg');
         $item = new Items();
@@ -48,5 +49,37 @@ class ItemsController extends Controller
             'error' => $e->getMessage()
         ], 500);
     }
+    }
+
+    public function companyItems (Request $request){
+        $companyId = $request->user()->company_id; 
+        
+        $items = DB::table('items_db')
+        ->join('users', 'items_db.owned_by', '=', 'users.id')
+        ->join('company_db', 'items_db.under_company', '=', 'company_db.id')
+        ->where('items_db.under_company', $companyId)
+        ->select('items_db.*', 'users.name as owned_by', 'company_db.company_name as under_company')
+        ->paginate(20); 
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => $items
+        ], 200);
+    }
+
+    public function userItems (Request $request){
+        $userId = $request->user()->id; 
+
+        $items = DB::table('items_db')
+            ->join('users', 'items_db.owned_by', '=', 'users.id')
+            ->join('company_db', 'items_db.under_company', '=', 'company_db.id')
+            ->where('items_db.owned_by', $userId)
+            ->select('items_db.*', 'users.name as owned_by', 'company_db.company_name as under_company')
+            ->paginate(20);
+            
+        return response()->json([
+            'status' => 'success',
+            'data' => $items
+        ], 200);
     }
 }
