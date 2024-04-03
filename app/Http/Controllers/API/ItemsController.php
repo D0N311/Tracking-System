@@ -20,7 +20,7 @@ class ItemsController extends Controller
         $configuration = \Uploadcare\Configuration::create(config('app.uploadcare_public'), config('app.uploadcare_secret'));
         $uploader = (new \Uploadcare\Api($configuration))->uploader();
         $user = User::where('email', $request->owned_by)->first();
-        $
+        
 
         $image = empty($request->image) ? '' : $uploader->fromPath($request->image, 'image/jpeg');
         $item = new Items();
