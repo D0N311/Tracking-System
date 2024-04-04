@@ -13,6 +13,8 @@ class Transaction extends Model
         'transaction_id',
         'ship_to',
         'ship_from',
+        'description',
+        'transaction_from',
         'approved_at',
         'shipped_at',
         'image_link',
@@ -20,4 +22,7 @@ class Transaction extends Model
         'delivery_at',
         'registered_by',
     ];
+
+
+
 }

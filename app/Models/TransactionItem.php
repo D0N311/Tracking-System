@@ -13,6 +13,12 @@ class TransactionItem extends Model
     use HasFactory;
     protected $table = 'transaction_item_db';
 
+    protected $fillable = [
+        'transaction_id',
+        'item_id',
+        'status_id',
+    ];
+
     public function transaction()
     {
         return $this->belongsTo(Transaction::class, 'transaction_id', 'id');

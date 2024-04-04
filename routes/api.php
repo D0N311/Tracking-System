@@ -9,6 +9,7 @@ use App\Http\Controllers\API\ItemsController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\RoleHasPermissionController;
+use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\UserHasRoleController;
 use App\Http\Controllers\VerifyEmailController;
 use App\Models\Items;
@@ -86,6 +87,7 @@ Route::middleware('auth:api', 'verified')->group(function () {
     // User Routes
     Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
         Route::post('addItems', [ItemsController::class, 'addItems']);
+        Route::post('addTransaction', [TransactionController::class, 'addTransaction']);
     });
 
     // General Routes
