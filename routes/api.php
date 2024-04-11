@@ -87,7 +87,6 @@ Route::middleware('auth:api', 'verified')->group(function () {
     // User Routes
     Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
         Route::post('addItems', [ItemsController::class, 'addItems']);
-        Route::post('addTransaction', [TransactionController::class, 'addTransaction']);
     });
 
     // General Routes
@@ -99,4 +98,6 @@ Route::middleware('auth:api', 'verified')->group(function () {
     Route::post('storeItem', [ItemsController::class, 'store']);
     Route::get('companyItems', [ItemsController::class, 'companyItems']);
     Route::get('userItems', [ItemsController::class, 'userItems']);
+    Route::post('addTransaction', [TransactionController::class, 'AddTransaction']);
+
 });

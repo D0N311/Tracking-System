@@ -20,6 +20,13 @@ class ItemsController extends Controller
         $configuration = \Uploadcare\Configuration::create(config('app.uploadcare_public'), config('app.uploadcare_secret'));
         $uploader = (new \Uploadcare\Api($configuration))->uploader();
         $user = User::where('email', $request->owned_by)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found'
+            ], 404);
+        }
         
 
         $image = empty($request->image) ? '' : $uploader->fromPath($request->image, 'image/jpeg');

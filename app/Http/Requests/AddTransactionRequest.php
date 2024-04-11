@@ -23,14 +23,14 @@ class AddTransactionRequest extends FormRequest
     {
         return [
 
-            'transaction_item' => 'required|array',
-            'transaction_item.*.item_id' => 'required|exists:items_db,id',
-            // 'transaction_item.*.quantity' => 'required|integer|min:1',
-            // 'description' => 'required|string',
-            'image_link' => 'required|string',
+            'description' => 'required|string',
             'courier_name' => 'required|string',
-            'ship_from' => 'required|string',
-            'ship_to' => 'required|exists:users,id',
+            'ship_from' => 'required|string|exists:company_db,company_name',
+            'ship_to' => 'required|exists:users,email',
+            'image' => 'required|file|mimes:jpeg,jpg,png|max:5048',
+            'transaction_item' => 'required|array',
+            'transaction_item.*.id' => 'required|exists:items_db,id',
+            
             
         ];
     }
