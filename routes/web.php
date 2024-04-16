@@ -13,9 +13,9 @@ use App\Http\Controllers\VerifyEmailController;
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+Route::get('/', function () {
+    return view('welcome');
+});
 
 Route::get('/email/verify/{id}', [VerifyEmailController::class, 'verify'])->name('verification.verify');
 // Route::get('/email/verify/{id}', [VerifyEmailController::class, 'verify'])

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('transaction_id');
             $table->foreignId('item_id')->constrained('items_db');
             $table->string('item_name');
-            $table->string('ship_to');
+            $table->string('ship_to')->constrained('users', 'name');
             $table->string('ship_from');
             $table->string('approved_at')->nullable();
             $table->string('shipped_at')->nullable();

@@ -23,6 +23,13 @@ class Transaction extends Model
         'registered_by',
     ];
 
-
+    public function ship_to()
+    {
+        return $this->belongsTo(User::class, 'ship_to', 'id');
+    }
+    public function registered_by()
+    {
+        return $this->belongsTo(User::class, 'registered_by', 'id');
+    }
 
 }

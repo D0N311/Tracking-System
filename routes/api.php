@@ -12,12 +12,7 @@ use App\Http\Controllers\API\RoleHasPermissionController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\UserHasRoleController;
 use App\Http\Controllers\VerifyEmailController;
-use App\Models\Items;
-use App\Models\Role;
-use Illuminate\Auth\Events\Login;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use PharIo\Manifest\Email;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +77,8 @@ Route::middleware('auth:api', 'verified')->group(function () {
         Route::post('activateUser', [AdminController::class, 'activateUser']);
         Route::get('userIndex', [AdminController::class, 'userIndex']);
         Route::post('deactivateUser', [AdminController::class, 'deactivateUser']);
+        Route::get('transactionIndex', [TransactionController::class, 'transactionIdex']);
+
     });
 
     // User Routes

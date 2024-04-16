@@ -58,4 +58,42 @@ class TransactionController extends Controller
             ], 500);
         }
     }
+    
+    // public function transactionIdex(){
+    //     $transactions = Transaction::with('ship_to', 'register_by')->paginate(10);
+    //     foreach ($transactions as $transaction) {
+    //         $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+    //         $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->get();
+    //     }
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $transactions
+    //     ], 200);
+    // }
+  
+    public function transactionIdex(){
+        $transactions = Transaction::with(['ship_to', 'registered_by'])->paginate(10);
+        foreach ($transactions as $transaction) {
+            $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+            $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->get();
+        }
+        return response()->json([
+            'status' => 'success',
+            'data' => $transactions
+        ], 200);
+    }
+
+    
+
+    // public function transactionIdex(){
+    //     $transactions = Transaction::paginate(10);
+    //     foreach ($transactions as $transaction) {
+    //         $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+    //         $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->get();
+    //     }
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $transactions
+    //     ], 200);
+    // }
 }

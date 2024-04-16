@@ -27,7 +27,7 @@ class AddTransactionRequest extends FormRequest
             'courier_name' => 'required|string',
             'ship_from' => 'required|string|exists:company_db,company_name',
             'ship_to' => 'required|exists:users,email',
-            'image' => 'required|file|mimes:jpeg,jpg,png|max:5048',
+            'image' => 'required|file|mimes:jpeg,jpg,png|max:2048',
             'transaction_item' => 'required|array',
             'transaction_item.*.id' => 'required|exists:items_db,id',
             
