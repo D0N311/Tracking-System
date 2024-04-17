@@ -33,4 +33,5 @@ class TransactionItem extends Model
     {
         return $this->belongsTo(Status::class, 'status_id', 'id');
     }
+    
 }

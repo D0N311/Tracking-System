@@ -71,22 +71,8 @@ class TransactionController extends Controller
     //     ], 200);
     // }
   
-    public function transactionIdex(){
-        $transactions = Transaction::with(['ship_to', 'registered_by'])->paginate(10);
-        foreach ($transactions as $transaction) {
-            $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
-            $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->get();
-        }
-        return response()->json([
-            'status' => 'success',
-            'data' => $transactions
-        ], 200);
-    }
-
-    
-
     // public function transactionIdex(){
-    //     $transactions = Transaction::paginate(10);
+    //     $transactions = Transaction::with(['ship_to', 'registered_by'])->paginate(10);
     //     foreach ($transactions as $transaction) {
     //         $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
     //         $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->get();
@@ -96,4 +82,49 @@ class TransactionController extends Controller
     //         'data' => $transactions
     //     ], 200);
     // }
+
+
+// public function transactionIdex(){
+//     // Get the user's company ID
+//     $companyId = auth()->user()->company_id;
+
+//     // Only fetch transactions that belong to the same company as the user
+//     $transactions = Transaction::with(['ship_to', 'registered_by'])
+//         ->where('transaction_from', $companyId)
+//         ->paginate(10);
+
+//     foreach ($transactions as $transaction) {
+//         $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+//         $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->get();
+//     }
+
+//     return response()->json([
+//         'status' => 'success',
+//         'data' => $transactions
+//     ], 200);
+// }
+
+
+public function transactionIdex(){
+    // Get the user's company ID
+    $companyId = auth()->user()->company_id;
+
+    // Only fetch transactions that belong to the same company as the user
+    $transactions = Transaction::with(['ship_to', 'registered_by', 'transaction_status'])
+        ->where('transaction_from', $companyId)
+        ->paginate(10);
+
+    foreach ($transactions as $transaction) {
+        $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+        $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->with('item')->get();
+        
+    }
+
+    return response()->json([
+        'status' => 'success',
+        'data' => $transactions
+    ], 200);
+}
+
+
 }

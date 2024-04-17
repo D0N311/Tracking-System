@@ -31,5 +31,11 @@ class Transaction extends Model
     {
         return $this->belongsTo(User::class, 'registered_by', 'id');
     }
+    public function status(){
+        return $this->belongsTo(Status::class, 'transaction_status', 'id');
+    }
+    public function transaction_status(){
+        return $this->belongsTo(Status::class, 'transaction_status', 'id');
+    }
 
 }

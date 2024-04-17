@@ -9,6 +9,7 @@ class Status extends Model
 {
     use HasFactory;
     public $incrementing = false;
+    protected $table = 'status';
     protected $keyType = 'char';
     protected $fillable = ['id'];
 }
