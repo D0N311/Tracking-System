@@ -78,7 +78,13 @@ Route::middleware('auth:api', 'verified')->group(function () {
         Route::get('userIndex', [AdminController::class, 'userIndex']);
         Route::post('deactivateUser', [AdminController::class, 'deactivateUser']);
         Route::get('transactionIndex', [TransactionController::class, 'transactionIdex']);
-
+        Route::post('approveTransaction', [TransactionController::class, 'approveTransaction']);
+        Route::get('inProgressIndex', [TransactionController::class, 'inProgressIndex']);
+        Route::post('cancelTransaction', [TransactionController::class, 'cancelTransaction']);
+        Route::get('cancelIndex', [TransactionController::class, 'cancelIndex']);
+        Route::get('historyIndex', [TransactionController::class, 'HistoryIndex']);
+        Route::post('recieveTransaction', [TransactionController::class, 'recieveTransaction']);
+        Route::get('deliverIndex', [TransactionController::class, 'deliverIndex']);
     });
 
     // User Routes

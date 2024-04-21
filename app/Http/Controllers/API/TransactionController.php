@@ -4,12 +4,15 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddTransactionRequest;
+use App\Http\Requests\ApprovalRequest;
 use App\Models\Company;
+use App\Models\Items;
 use App\Models\TransactionItem;
-use App\Models\User;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\User;
+use App\Models\Role;
+use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
@@ -59,72 +62,243 @@ class TransactionController extends Controller
         }
     }
     
-    // public function transactionIdex(){
-    //     $transactions = Transaction::with('ship_to', 'register_by')->paginate(10);
-    //     foreach ($transactions as $transaction) {
-    //         $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
-    //         $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->get();
-    //     }
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'data' => $transactions
-    //     ], 200);
-    // }
-  
-    // public function transactionIdex(){
-    //     $transactions = Transaction::with(['ship_to', 'registered_by'])->paginate(10);
-    //     foreach ($transactions as $transaction) {
-    //         $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
-    //         $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->get();
-    //     }
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'data' => $transactions
-    //     ], 200);
-    // }
+    public function transactionIdex(){
+        $companyId = auth()->user()->company_id;
 
+        $transactions = Transaction::with(['ship_to', 'registered_by', 'transaction_status'])
+            ->where('transaction_from', $companyId)
+            ->where('transaction_status', 1)
+            ->paginate(10);
 
-// public function transactionIdex(){
-//     // Get the user's company ID
-//     $companyId = auth()->user()->company_id;
+        foreach ($transactions as $transaction) {
+            $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+            $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->with('item')->get();
+        }
 
-//     // Only fetch transactions that belong to the same company as the user
-//     $transactions = Transaction::with(['ship_to', 'registered_by'])
-//         ->where('transaction_from', $companyId)
-//         ->paginate(10);
-
-//     foreach ($transactions as $transaction) {
-//         $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
-//         $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->get();
-//     }
-
-//     return response()->json([
-//         'status' => 'success',
-//         'data' => $transactions
-//     ], 200);
-// }
-
-
-public function transactionIdex(){
-    // Get the user's company ID
-    $companyId = auth()->user()->company_id;
-
-    // Only fetch transactions that belong to the same company as the user
-    $transactions = Transaction::with(['ship_to', 'registered_by', 'transaction_status'])
-        ->where('transaction_from', $companyId)
-        ->paginate(10);
-
-    foreach ($transactions as $transaction) {
-        $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
-        $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->with('item')->get();
-        
+        return response()->json([
+            'status' => 'success',
+            'data' => $transactions
+        ], 200);
     }
 
-    return response()->json([
-        'status' => 'success',
-        'data' => $transactions
-    ], 200);
-}
+       public function inProgressIndex(){
+        $companyId = auth()->user()->company_id;
 
+        $transactions = Transaction::with(['ship_to', 'registered_by', 'transaction_status'])
+            ->where('transaction_from', $companyId)
+            ->where('transaction_status', 2)
+            ->paginate(10);
+
+        foreach ($transactions as $transaction) {
+            $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+            $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->with('item')->get();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $transactions
+        ], 200);
+    }
+
+    public function cancelIndex(){
+        $companyId = auth()->user()->company_id;
+
+        $transactions = Transaction::with(['ship_to', 'registered_by', 'transaction_status'])
+            ->where('transaction_from', $companyId)
+            ->where('transaction_status', 4)
+            ->paginate(10);
+
+        foreach ($transactions as $transaction) {
+            $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+            $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->with('item')->get();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $transactions
+        ], 200);
+    }
+
+    
+    public function deliverIndex(){
+        $companyId = auth()->user()->company_id;
+
+        $transactions = Transaction::with(['ship_to', 'registered_by', 'transaction_status'])
+            ->where('transaction_from', $companyId)
+            ->where('transaction_status', 3)
+            ->paginate(10);
+
+        foreach ($transactions as $transaction) {
+            $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+            $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->with('item')->get();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $transactions
+        ], 200);
+    }
+
+
+
+
+    public function approveTransaction(ApprovalRequest $request){
+        $user = auth()->user();
+        DB::beginTransaction();
+        try{
+        if (!$user->getRoleNames()->contains('Admin')) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Only admins can approve transactions'
+            ], 403);
+        }   
+     
+        $transaction = Transaction::where('transaction_id', $request->transaction_id)->first();
+        if ($transaction->transaction_status != 1 && $transaction->transaction_status != 4) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Transaction already approved'
+            ], 400);
+        }
+        $transaction->transaction_status = 2;
+        $transaction->approved_at = now();
+        $transaction->save();
+        $transactionItems = TransactionItem::where('transaction_id', $transaction->id)->get();
+
+        foreach($transactionItems as $item){
+            Log::info('Processing transaction item: ' . $item->id);
+            $item->status_id = 2;
+            $item->save();
+        }
+        DB::commit();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Transaction approved successfully',
+            'data' => $transaction
+        ], 200);
+    }catch(\Exception $e){
+        DB::rollback();
+        return response()->json([
+            'status' => 'failed',
+            'message' =>  $e->getMessage()
+        ], 500);
+    }
+    }
+
+
+    public function cancelTransaction(ApprovalRequest $request){
+        $user = auth()->user();
+        DB::beginTransaction();
+        try{
+            if (!$user->getRoleNames()->contains('Admin')) {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Only admins can cancel transactions'
+                ], 403);
+            }
+         
+            $transaction = Transaction::where('transaction_id', $request->transaction_id)->first();
+            if ($transaction->transaction_status != 1 && $transaction->transaction_status != 2) {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Transaction cannot be cancelled'
+                ], 400);
+            }
+            $transaction->transaction_status = 4;
+            $transaction->cancelled_at = now();
+            $transaction->save();
+            $transactionItems = TransactionItem::where('transaction_id', $transaction->id)->get();
+    
+            foreach($transactionItems as $item){
+                Log::info('Processing transaction item: ' . $item->id);
+                $item->status_id = 4;
+                $item->save();
+                Log::info('Updated status_id for transaction item: ' . $item->id);
+            }
+            DB::commit();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaction cancelled successfully',
+                'data' => $transaction
+            ], 200);
+        }catch(\Exception $e){
+            DB::rollback();
+            return response()->json([
+                'status' => 'failed',
+                'message' =>  $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function HistoryIndex(){
+        $companyId = auth()->user()->company_id;
+
+        $transactions = Transaction::with(['ship_to', 'registered_by', 'transaction_status'])
+            ->where('transaction_from', $companyId)
+            ->where('transaction_status', '<>', 1)
+            ->paginate(10);
+
+        foreach ($transactions as $transaction) {
+            $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+            $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->with('item')->get();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $transactions
+        ], 200);
+    }
+
+    
+    
+    public function recieveTransaction (ApprovalRequest $request) {
+
+        $user = auth()->user();
+        DB::beginTransaction();
+        try{
+            if (!$user->getRoleNames()->contains('Admin')) {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Only admins can recieve transactions'
+                ], 403);
+            }
+         
+            $transaction = Transaction::where('transaction_id', $request->transaction_id)->first();
+            if ($transaction->transaction_status != 2) {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Transaction already recieved'
+                ], 400);
+            }
+            $transaction->transaction_status = 3;
+            $transaction->recieved_at = now();
+            $transaction->save();
+            $transactionItems = TransactionItem::where('transaction_id', $transaction->id)->get();
+
+            foreach($transactionItems as $item){
+                $item->status_id = 3;
+                $item->save();
+
+                $relatedItem = Items::find($item->item_id);
+                if ($relatedItem) {
+                    $relatedItem->owned_by = $transaction->ship_to;
+                    $relatedItem->save();
+                }
+            }
+            
+            DB::commit();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaction recieved successfully',
+                'data' => $transaction
+            ], 200);
+        }catch(\Exception $e){
+            DB::rollback();
+            return response()->json([
+                'status' => 'failed',
+                'message' =>  $e->getMessage()
+            ], 500);
+        }
+    }
 
 }
