@@ -16,17 +16,24 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
+    private $configuration;
+    private $uploader;
+
+    public function __construct()
+    {
+        $this->configuration = \Uploadcare\Configuration::create(config('app.uploadcare_public'), config('app.uploadcare_secret'));
+        $this->uploader = (new \Uploadcare\Api($this->configuration))->uploader();
+    }
    
     public function AddTransaction(AddTransactionRequest $request){
         DB::beginTransaction();
-        $configuration = \Uploadcare\Configuration::create(config('app.uploadcare_public'), config('app.uploadcare_secret'));
-        $uploader = (new \Uploadcare\Api($configuration))->uploader();
+        
         $transactionID = 'TXN' . time() . rand(1000, 9999);
         $transactionFrom = Company::where('company_name', $request->ship_from)->first()->id;
         $registerBy = auth()->user()->id;
         
         try {
-            $image = empty($request->image) ? '' : $uploader->fromPath($request->image, 'image/jpeg');
+            $image = empty($request->image) ? '' : $this->uploader->fromPath($request->image, 'image/jpeg');
             $user = User::where('email', $request->ship_to)->first();
             $transaction = new Transaction();
             $transaction->transaction_id = $transactionID;
@@ -53,7 +60,9 @@ class TransactionController extends Controller
                 'message' => 'Transaction added successfully',
                 'data' => $transaction
             ], 201);
-        } catch (\Exception $e) {
+        }
+       
+         catch (\Exception $e) {
             DB::rollback();
             return response()->json([
                 'message' => 'Failed to add transaction',
@@ -252,14 +261,17 @@ class TransactionController extends Controller
     
     
     public function recieveTransaction (ApprovalRequest $request) {
+        
 
         $user = auth()->user();
+        $companyId = $user->company_id;
         DB::beginTransaction();
         try{
-            if (!$user->getRoleNames()->contains('Admin')) {
+            $image = empty($request->image) ? '' : $this->uploader->fromPath($request->image, 'image/jpeg');
+            if (!$user->getRoleNames()->contains('User')) {
                 return response()->json([
                     'status' => 'failed',
-                    'message' => 'Only admins can recieve transactions'
+                    'message' => 'You cant recieve transactions'
                 ], 403);
             }
          
@@ -272,18 +284,21 @@ class TransactionController extends Controller
             }
             $transaction->transaction_status = 3;
             $transaction->recieved_at = now();
+            $transaction->r_description = $request->r_description;
+            $transaction->r_image_link = empty($image) ? 'none' : 'https://ucarecdn.com/' . $image->getUuid() . '/-/preview/500x500/-/quality/smart/-/format/auto/';
             $transaction->save();
             $transactionItems = TransactionItem::where('transaction_id', $transaction->id)->get();
 
             foreach($transactionItems as $item){
                 $item->status_id = 3;
                 $item->save();
-
                 $relatedItem = Items::find($item->item_id);
                 if ($relatedItem) {
                     $relatedItem->owned_by = $transaction->ship_to;
+                    $relatedItem->under_company = $companyId;
                     $relatedItem->save();
                 }
+
             }
             
             DB::commit();
@@ -299,6 +314,44 @@ class TransactionController extends Controller
                 'message' =>  $e->getMessage()
             ], 500);
         }
+    }
+
+    public function userToRecieveIndex (){
+        $userId = auth()->user()->id;
+
+        $transactions = Transaction::with(['ship_to', 'registered_by', 'transaction_status'])
+            ->where('ship_to', $userId)
+            ->where('transaction_status', 2)
+            ->paginate(10);
+
+        foreach ($transactions as $transaction) {
+            $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+            $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->with('item')->get();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $transactions
+        ], 200);
+    }
+
+    public function transRecievedIndex (){
+        $userId = auth()->user()->id;
+
+        $transactions = Transaction::with(['ship_to', 'registered_by', 'transaction_status'])
+            ->where('ship_to', $userId)
+            ->where('transaction_status', 3)
+            ->paginate(10);
+
+        foreach ($transactions as $transaction) {
+            $transaction->items_count = TransactionItem::where('transaction_id', $transaction->id)->count();
+            $transaction->items = TransactionItem::where('transaction_id', $transaction->id)->with('item')->get();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $transactions
+        ], 200);
     }
 
 }

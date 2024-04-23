@@ -83,13 +83,15 @@ Route::middleware('auth:api', 'verified')->group(function () {
         Route::post('cancelTransaction', [TransactionController::class, 'cancelTransaction']);
         Route::get('cancelIndex', [TransactionController::class, 'cancelIndex']);
         Route::get('historyIndex', [TransactionController::class, 'HistoryIndex']);
-        Route::post('recieveTransaction', [TransactionController::class, 'recieveTransaction']);
         Route::get('deliverIndex', [TransactionController::class, 'deliverIndex']);
     });
 
     // User Routes
     Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
         Route::post('addItems', [ItemsController::class, 'addItems']);
+        Route::get('toRecieveIndex', [TransactionController::class, 'userToRecieveIndex']);
+        Route::post('recieveTransaction', [TransactionController::class, 'recieveTransaction']);
+        Route::get('receivedIndex', [TransactionController::class, 'transRecievedIndex']);
     });
 
     // General Routes

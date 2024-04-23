@@ -12,16 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('transaction_db', function (Blueprint $table) {
-            $table->dropForeign(['item_id']); // Drop the foreign key constraint
-            $table->dropColumn('item_id');
+            $table->dropColumn('delivered_at');
         });
     }
-    
+
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::table('transaction_db', function (Blueprint $table) {
-            $table->unsignedBigInteger('item_id')->after('transaction_id'); // Add the column back
-            $table->foreign('item_id')->references('id')->on('items_db'); // Add the foreign key constraint back
+            //
         });
     }
 };

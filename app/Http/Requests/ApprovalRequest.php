@@ -23,6 +23,8 @@ class ApprovalRequest extends FormRequest
     {
         return [
             'transaction_id' => 'required|string|exists:transaction_db,transaction_id',
+            'image' => 'nullable|file|mimes:jpeg,jpg,png|max:2048',
+            'r_description' => 'nullable|string|max:255',
         ];
     }
 }
