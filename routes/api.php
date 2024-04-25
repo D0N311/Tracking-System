@@ -95,7 +95,7 @@ Route::middleware('auth:api', 'verified')->group(function () {
     });
 
     // General Routes
-    Route::resource('products', ProductController::class);
+    // Route::resource('products', ProductController::class);
     Route::post('logout', [LoginController::class, 'logout']);
     Route::get('checkUser', [LoginController::class, 'checkUser']);
     Route::get('searchInput', [VerifyEmailController::class, 'searchInput']);
@@ -105,4 +105,7 @@ Route::middleware('auth:api', 'verified')->group(function () {
     Route::get('userItems', [ItemsController::class, 'userItems']);
     Route::post('addTransaction', [TransactionController::class, 'AddTransaction']);
 
+    Route::get('test', function() {
+        return response('Testing');
+    });
 });
