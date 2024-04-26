@@ -31,6 +31,6 @@ class RegisterController extends Controller
             Mail::to($request->email)->send(new VerificationMail($user));
         }
     
-        return $this->sendResponse($success, 'User registered successfully.');
+        return $this->sendResponse('User registered successfully.', []);
     }
 }
