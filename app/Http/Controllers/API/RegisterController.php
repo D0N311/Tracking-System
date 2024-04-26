@@ -25,6 +25,7 @@ class RegisterController extends Controller
             $role = Role::where('name', 'SuperAdmin')->first();
             $user->roles()->attach($role->id);
             $user->activated_at = now();
+            Mail::to($request->email)->send(new VerificationMail($user));
             $user->save();
         } else {
             Mail::to($request->email)->send(new VerificationMail($user));

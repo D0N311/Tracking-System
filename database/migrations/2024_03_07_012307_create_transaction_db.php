@@ -14,8 +14,6 @@ return new class extends Migration
         Schema::create('transaction_db', function (Blueprint $table) {
             $table->id();
             $table->string('transaction_id');
-            $table->foreignId('item_id')->constrained('items_db');
-            $table->string('item_name');
             $table->string('ship_to')->constrained('users', 'name');
             $table->string('ship_from');
             $table->string('approved_at')->nullable();

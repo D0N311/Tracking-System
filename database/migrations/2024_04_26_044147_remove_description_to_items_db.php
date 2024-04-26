@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('transaction_db', function (Blueprint $table) {
-            
-
-            $table->timestamp('r_description')->nullable()->after('description');
-            $table->timestamp('r_image_link')->nullable()->after('image_link');
+        Schema::table('items_db', function (Blueprint $table) {
+            $table->dropColumn('description');
         });
     }
 
@@ -24,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('transaction_db', function (Blueprint $table) {
+        Schema::table('items_db', function (Blueprint $table) {
             //
         });
     }
