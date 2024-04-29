@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\RegisterController;
-use App\Http\Controllers\API\LoginController;
+use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\SuperAdminController;
 use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\API\ItemsController;
@@ -25,9 +25,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('register', [RegisterController::class, 'register']);
-// Route::post('login', [LoginController::class, 'login']);
-Route::post('login', [LoginController::class, 'login'])->middleware('throttle:3,1');
+Route::post('register', [AuthController::class, 'register'])->middleware('throttle:3,1');
+Route::post('login', [AuthController::class, 'login'])->middleware('throttle:3,1');
 
 
 Route::middleware('auth:api', 'verified')->group(function () {
@@ -92,8 +91,8 @@ Route::middleware('auth:api', 'verified')->group(function () {
 
     // General Routes
     // Route::resource('products', ProductController::class);
-    Route::post('logout', [LoginController::class, 'logout']);
-    Route::get('checkUser', [LoginController::class, 'checkUser']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('checkUser', [AuthController::class, 'checkUser']);
     Route::get('searchInput', [VerifyEmailController::class, 'searchInput']);
     Route::get('noRoleIndex', [SuperAdminController::class, 'noRoleIndex']);
     Route::post('storeItem', [ItemsController::class, 'store']);
