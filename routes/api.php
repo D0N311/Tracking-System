@@ -1,18 +1,20 @@
 <?php
 
-use App\Http\Controllers\API\ProductController;
-use App\Http\Controllers\API\RegisterController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\SuperAdminController;
 use App\Http\Controllers\API\AdminController;
+use App\Http\Controllers\API\CodeCheckController;
 use App\Http\Controllers\API\ItemsController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\RoleHasPermissionController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\UserHasRoleController;
+use App\Http\Controllers\API\ForgotPasswordController;
+use App\Http\Controllers\API\ResetPasswordController;
 use App\Http\Controllers\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +29,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('register', [AuthController::class, 'register'])->middleware('throttle:3,1');
 Route::post('login', [AuthController::class, 'login'])->middleware('throttle:3,1');
+Route::post('forgotPassword', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
+Route::post('resetPassword', [AuthController::class, 'resetPassword'])->middleware('throttle:3,1');
 
+Route::post('password/email',  ForgotPasswordController::class)->middleware('throttle:3,1');
+Route::post('password/code/check', CodeCheckController::class)->middleware('throttle:3,1');
+Route::post('password/reset', ResetPasswordController::class)->middleware('throttle:3,1');
 
 Route::middleware('auth:api', 'verified')->group(function () {
     // SuperAdmin Routes
@@ -90,7 +97,6 @@ Route::middleware('auth:api', 'verified')->group(function () {
     });
 
     // General Routes
-    // Route::resource('products', ProductController::class);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('checkUser', [AuthController::class, 'checkUser']);
     Route::get('searchInput', [VerifyEmailController::class, 'searchInput']);
@@ -99,6 +105,7 @@ Route::middleware('auth:api', 'verified')->group(function () {
     Route::get('companyItems', [ItemsController::class, 'companyItems']);
     Route::get('userItems', [ItemsController::class, 'userItems']);
     Route::post('addTransaction', [TransactionController::class, 'AddTransaction']);
+    Route::post('resetPassword', [AuthController::class, 'resetPassword']);
 
     Route::get('test', function() {
         return response('Testing');

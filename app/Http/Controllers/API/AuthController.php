@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Role;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use App\Models\Role;
+use App\Models\User;
 use App\Mail\VerificationMail;
 use App\Http\Requests\RegisterRequest;
-
+use App\Http\Requests\ResetPasswordRequest;
 
 class AuthController extends Controller
 {
@@ -49,6 +49,7 @@ class AuthController extends Controller
 
     public function login(Request $request): JsonResponse
     {
+
         $credentials = ['email' => $request->email, 'password' => $request->password];
         $user = User::where('email', $request->email)->first();
         if (!$user) {
@@ -96,4 +97,27 @@ class AuthController extends Controller
         $user->token()->revoke();
         return response()->json([], 200);
     }
+
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $user = Auth::user();
+            if (!Hash::check($request->old_password, $user->password)) {
+                return $this->sendError('Wrong password.', ['error' => 'Wrong password']);
+            }
+            if (Hash::check($request->new_password, $user->password)) {
+                return $this->sendError('New password cannot be the same as old password.', ['error' => 'New password cannot be the same as old password']);
+            }
+            $user->password = bcrypt($request->new_password);
+            $user->save();
+            DB::commit();     
+            return $this->sendResponse($user, 'Password reset successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->sendError('Password reset failed.', $e->getMessage(), 500);
+        }
+    }
+
+   
 }
