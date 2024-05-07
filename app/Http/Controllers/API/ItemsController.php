@@ -33,7 +33,7 @@ class ItemsController extends Controller
         $item = new Items();
         $item->name = $request->item_name;
         $item->item_type = $request->item_type;
-        $item->stock = $request->stocks;
+        $item->stock = null;
         $item->model_number = $request->model_number;
         $item->image_link = empty($image) ? 'none' : 'https://ucarecdn.com/' . $image->getUuid() . '/-/preview/500x500/-/quality/smart/-/format/auto/';
         $item->under_company = $request->under_company;
